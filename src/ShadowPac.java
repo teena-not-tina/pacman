@@ -172,5 +172,93 @@ public class ShadowPac extends AbstractGame  {
 
     }
 
-    // I need to know if the pacman is touching the dot or the wall or the ghost!
+    public void touched(Player player, List <Wall> walls, List <Ghost> ghosts, List <Dot> dots) {
+        System.out.println("touched/////////////");
+        int orgX = player.x;
+        int orgY = player.y;
+
+        int changedX = 0;
+        int changedY = 0;
+
+        // change the position of the hitbox which will test if it can move or not.
+        // change its position according to the input.
+        switch (player.direction) {
+            case "Right":
+                // this is +3 bc it's 3 pixels per frame.
+                changedX = player.x+3;
+                changedY = player.y;
+                player.hitbox.moveTo(new Point(changedX, changedY));
+                // System.out.println("RIGHT");
+                break;
+
+            case "Left":
+                changedX = player.x-3;
+                changedY = player.y;
+                player.hitbox.moveTo(new Point(changedX, changedY));
+                // System.out.println("LEFT");
+                break;
+
+            case "Up":
+                changedX = player.x;
+                changedY = player.y-3;
+                player.hitbox.moveTo(new Point(changedX, changedY));
+                // System.out.println("UP");
+                break;
+
+            case "Down":
+                changedX = player.x;
+                changedY = player.y+3;
+                player.hitbox.moveTo(new Point(changedX, changedY));
+                // System.out.println("DOWN");
+                break;
+        }
+
+        System.out.println("Hitbox changed X: "+changedX);
+        System.out.println("Hitbox changed Y: "+changedY);
+
+        // if it hits the wall, then we don’t change the actual direction.
+        // note we are assigning its position back to the original position.
+        for(Wall wall: walls) {
+            if (player.hitbox.intersects(wall.hitbox)) {
+                player.hitbox.moveTo(new Point(orgX, orgY));
+                System.out.println("Collided into wall");
+                return;
+            }
+        }
+        // if it hits the ghost, we will move the pacman to its starting position
+        for(Ghost ghost: ghosts) {
+            if(player.hitbox.intersects(ghost.hitbox)) {
+                player.heart -= 1;
+                player.x = 474;
+                player.y = 662;
+                player.hitbox.moveTo(new Point(player.x, player.y));
+                // System.out.println("Collided into ghost");
+
+                return;
+            }
+        }
+
+        // we update the score if it is eaten. update its position too.
+        for(Dot dot: dots) {
+            if(player.hitbox.intersects(dot.hitbox)) {
+                if(dot.eaten != true) {
+                    player.score += 10;
+                }
+                dot.eaten = true;
+
+                player.x = changedX;
+                player.y = changedY;
+                // System.out.println("Collided into dot");
+
+                return;
+            }
+        }
+        // no collide just update position
+        System.out.println("X: "+player.x+" | Y: "+player.y+" ** BEFORE CHANGE **");
+        player.x = changedX;
+        player.y = changedY;
+        System.out.println("X: "+player.x+" | Y: "+player.y+" ** AFTER CHANGE **");
+
+    }
+
 }
