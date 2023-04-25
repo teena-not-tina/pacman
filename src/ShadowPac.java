@@ -12,7 +12,7 @@ import java.util.Scanner;
 import bagel.util.Point;
 import bagel.util.Rectangle;
 
-
+import static java.lang.Math.PI;
 /**
  * Skeleton Code for SWEN20003 Project 1, Semester 1, 2023
  *
@@ -28,6 +28,7 @@ public class ShadowPac extends AbstractGame  {
     private final Image ghostImage = new Image("../res/ghostRed.png");
     private final Image wallImage = new Image("../res/wall.png");
     private final Image dotImage = new Image("../res/dot.png");
+    private final Image heartImage = new Image("../res/heart.png");
     private final Image pacClosed = new Image("../res/pac.png");
     private final Image pacOpen = new Image("../res/pacOpen.png");
     // we will use arrays here so it is easy to read the csv file and add the elements
@@ -102,13 +103,17 @@ public class ShadowPac extends AbstractGame  {
      */
     @Override
     protected void update(Input input) {
-        // need to add:
-        // state of the game winning or losing ?
-        // the images of direction of the pacman
-        // frames of the pacman
-        // score, heart
-        // and more...
+        int frameToUpdate;
+        double degree = 0;
+        int life;
+
         Font font = new Font("../res/FSO8BITR.TTF", 64);
+
+        Image pacClosed = new Image("../res/pac.png");
+        Image pacOpen = new Image("../res/pacOpen.png");
+        Image pac = pacClosed;
+        DrawOptions drawOptions = new DrawOptions().setRotation(degree);
+
         if (input.wasPressed(Keys.ESCAPE)){
             Window.close();
         }
@@ -118,7 +123,6 @@ public class ShadowPac extends AbstractGame  {
             font.drawString("SHADOW PAC", 260, 250);
             font = new Font("../res/FSO8BITR.TTF", 24);
             font.drawString("PRESS SPACE TO START\nUSE ARROW KEYS TO MOVE", 260 + 60, 250 + 190);
-
         }
 
         // start page to game in progress
@@ -127,9 +131,19 @@ public class ShadowPac extends AbstractGame  {
         }
 
         if (state.equals("In progress")) {
-            // need to code: how do we know if it is from in progress to game over? or in progress to game won?
-            // need to code: change direction of the pacman.
             boolean checkMoving = false;
+
+            // in progress to lose
+            if ((players.get(0).heart).equals(0)){
+                // game over
+                state = "Game lost";
+                return;
+            }
+            // in progress to win
+            if ((players.get(0).score).equals(1210)) {
+                state = "Game won";
+                return;
+            }
 
             // wall, dot, ghost classes are added.
             for (Wall wall:walls) {
@@ -162,18 +176,84 @@ public class ShadowPac extends AbstractGame  {
                 players.get(0).direction = "Down";
                 checkMoving = true;
             }
+            if (checkMoving == true) {
+                touched(players.get(0), walls, ghosts, dots);
+            }
 
-            // just to see if the game is running correctly. Be aware frame needs to be added.
-            players.get(0).Draw(pacOpen);
+            // we keep track of the frame on the player class. Update it everytime it goes through update()
+            frameToUpdate = players.get(0).frame;
+            players.get(0).frame += 1;
+            // from 1 to 15: open mouth, 16 to 30: close mouth. set back to 0 when above 30.
+            if (0 <= frameToUpdate && frameToUpdate < 16) {
+                pac = pacOpen;
+            }
+            if (frameToUpdate >= 16 && frameToUpdate < 31) {
+                pac = pacClosed;
+            }
+            if (frameToUpdate > 30) {
+                players.get(0).frame = 0;
+            }
 
+            // update degrees and rotate accordingly.
+            if (players.get(0).direction.equals("Right")) {
+                degree = 0;
+                drawOptions = new DrawOptions().setRotation(degree);
+                pac.drawFromTopLeft(players.get(0).x, players.get(0).y, drawOptions);
+                // System.out.println(">>>>>>");
+            }
+            if (players.get(0).direction.equals("Left")) {
+                degree = PI;
+                drawOptions = new DrawOptions().setRotation(degree);
+                pac.drawFromTopLeft(players.get(0).x, players.get(0).y, drawOptions);
+                // System.out.println("<<<<<<<<<<<");
+            }
+            if (players.get(0).direction.equals("Up")) {
+                degree = PI + PI/2;
+                drawOptions = new DrawOptions().setRotation(degree);
+                pac.drawFromTopLeft(players.get(0).x, players.get(0).y, drawOptions);
+                // System.out.println("^^^^^^^^^^^^^");
+            }
+            if (players.get(0).direction.equals("Down")) {
+                degree = PI/2;
+                drawOptions = new DrawOptions().setRotation(degree);
+                pac.drawFromTopLeft(players.get(0).x, players.get(0).y, drawOptions);
+
+                // System.out.println("downnnnnnnnn");
+            }
+
+            // here we create score
+            font = new Font("../res/FSO8BITR.TTF", 20);
+            font.drawString("SCORE", 25, 25);
+            font.drawString(Integer.toString(players.get(0).score), 25+78.125+12.5, 25);
+
+            // here we create hearts - we can access to number of hearts through players.get(0).heart
+            life = players.get(0).heart;
+            switch(life){
+                case (3):
+                    heartImage.drawFromTopLeft(900, 10);
+                    heartImage.drawFromTopLeft(900+30, 10);
+                    heartImage.drawFromTopLeft(900+30+30, 10);
+                case (2):
+                    heartImage.drawFromTopLeft(900, 10);
+                    heartImage.drawFromTopLeft(900+30, 10);
+                case (1):
+                    heartImage.drawFromTopLeft(900, 10);
+            }
 
         }
 
+        if (state.equals("Game won")) {
+            font.drawString("WELL DONE!", 280, 400);
+        }
+
+        if (state.equals("Game lost")) {
+            font.drawString("GAME OVER!", 280, 400);
+        }
 
     }
 
     public void touched(Player player, List <Wall> walls, List <Ghost> ghosts, List <Dot> dots) {
-        System.out.println("touched/////////////");
+        // System.out.println("touched - - - - - - -");
         int orgX = player.x;
         int orgY = player.y;
 
