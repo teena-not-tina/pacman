@@ -102,12 +102,55 @@ public class ShadowPac extends AbstractGame  {
      */
     @Override
     protected void update(Input input) {
-        // in here we will need to update the state of the game
-        // update which key is pressed
+        // need to add:
+        // state of the game winning or losing ?
+        // direction of the pacman
         // frames of the pacman
         // score, heart
         // and more...
+        Font font = new Font("../res/FSO8BITR.TTF", 64);
+        if (input.wasPressed(Keys.ESCAPE)){
+            Window.close();
+        }
+        // just the start screen
+        BACKGROUND_IMAGE.draw(Window.getWidth()/2.0, Window.getHeight()/2.0);
+        if(state.equals("Start")) {
+            font.drawString("SHADOW PAC", 260, 250);
+            font = new Font("../res/FSO8BITR.TTF", 24);
+            font.drawString("PRESS SPACE TO START\nUSE ARROW KEYS TO MOVE", 260 + 60, 250 + 190);
+
+        }
+
+        // start page to game in progress
+        if (input.wasPressed(Keys.SPACE) && state.equals("Start")){
+            state = "In progress";
+        }
+
+        if (state.equals("In progress")) {
+            // need to code: how do we know if it is from in progress to game over? or in progress to game won?
+            // we only want one keyboard input at once. no moving diagonally.
+            // need to code: change direction of the pacman.
+            boolean checkMoving = false;
+
+            // wall, dot, ghost classes are added.
+            for (Wall wall:walls) {
+                wall.Draw(wallImage);
+            }
+            for (Dot dot:dots) {
+                if (dot.eaten == false) {
+                    dot.Draw(dotImage);
+                }
+
+            }
+            for (Ghost ghost:ghosts) {
+                ghost.Draw(ghostImage);
+            }
+
+
+        }
+
 
     }
+
     // I need to know if the pacman is touching the dot or the wall or the ghost!
 }
