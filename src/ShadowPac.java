@@ -104,7 +104,7 @@ public class ShadowPac extends AbstractGame  {
     protected void update(Input input) {
         // need to add:
         // state of the game winning or losing ?
-        // direction of the pacman
+        // the images of direction of the pacman
         // frames of the pacman
         // score, heart
         // and more...
@@ -128,7 +128,6 @@ public class ShadowPac extends AbstractGame  {
 
         if (state.equals("In progress")) {
             // need to code: how do we know if it is from in progress to game over? or in progress to game won?
-            // we only want one keyboard input at once. no moving diagonally.
             // need to code: change direction of the pacman.
             boolean checkMoving = false;
 
@@ -145,6 +144,27 @@ public class ShadowPac extends AbstractGame  {
             for (Ghost ghost:ghosts) {
                 ghost.Draw(ghostImage);
             }
+            // we only want one keyboard input at once. no moving diagonally.
+            // player class is added - this is to keep track of the direction
+            if (input.isDown(Keys.LEFT)) {
+                players.get(0).direction = "Left";
+                checkMoving = true;
+            }
+            if (input.isDown(Keys.RIGHT)) {
+                players.get(0).direction = "Right";
+                checkMoving = true;
+            }
+            if (input.isDown(Keys.UP)) {
+                players.get(0).direction = "Up";
+                checkMoving = true;
+            }
+            if (input.isDown(Keys.DOWN)) {
+                players.get(0).direction = "Down";
+                checkMoving = true;
+            }
+
+            // just to see if the game is running correctly. Be aware frame needs to be added.
+            players.get(0).Draw(pacOpen);
 
 
         }
